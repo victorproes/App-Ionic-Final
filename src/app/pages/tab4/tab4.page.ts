@@ -1,75 +1,81 @@
-import { Component, OnInit } from '@angular/core';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Storage } from '@ionic/storage-angular';
+import { Component } from '@angular/core';
+import { ModalController } from '@ionic/angular';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Share } from '@capacitor/share';
+import { ModalExampleComponent } from 'src/app/modal/modal-example.component';
 
 @Component({
   selector: 'app-tab4',
   templateUrl: 'tab4.page.html',
   styleUrls: ['tab4.page.scss']
 })
-export class Tab4Page implements OnInit {
-  formData = {
-    country: '',
-    province: ''
-  };
-  selectedFile: File | null = null;
-  photoData: string | null = null;
-  submitted: boolean = false;
+export class Tab4Page {
+  noticias: any[] = [];
 
-  constructor(private storage: Storage) {}
+  constructor(
+    private modalController: ModalController,
+    private firestore: AngularFirestore
+  ) {}
 
   async ngOnInit() {
-    await this.storage.create();
+    // Cargar las noticias guardadas desde Firebase Firestore
+    // Se suscribe a los cambios en la colección de noticias y actualiza la lista de noticias
+    this.firestore.collection<any>('Noticias').valueChanges().subscribe(noticias => {
+      this.noticias = noticias;
+    });
   }
 
-  async takePhoto() {
-    try {
-      // Capturar la foto con la cámara
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Base64,
-        source: CameraSource.Camera
-      });
-
-      // Guardar la foto en el almacenamiento local
-      if (photo && photo.base64String) {
-        this.photoData = photo.base64String;
-        console.log('Photo captured:', photo);
-      } else {
-        console.error('No se pudo obtener la foto o la cadena base64 está vacía.');
-      }
-    } catch (error) {
-      console.error('Error taking photo:', error);
+  async openModal() {
+    // Abre un modal para agregar una nueva noticia
+    const modal = await this.modalController.create({
+      component: ModalExampleComponent
+    });
+    await modal.present();
+  
+    // Espera hasta que el modal se cierre y recibe los datos de retorno
+    const { data, role } = await modal.onDidDismiss();
+    console.log(data);
+    
+    if (role === 'confirm') {
+      // Si el usuario confirma, agrega la noticia a la lista de noticias
+      this.noticias.push(data);
+  
+      // Guarda la nueva noticia en Firebase Firestore
+      await this.firestore.collection('Noticias').add(data);
     }
   }
 
-  async onSubmit() {
-    // Guardar los datos localmente
-    const formData = {
-      country: this.formData.country,
-      province: this.formData.province,
-      photo: this.photoData
+  async compartirNoticia(noticia: any) {
+    const { titulo, descripcion, foto } = noticia;
+
+    // Construye el mensaje con el título y la descripción de la noticia
+    const mensaje = `${titulo}\n${descripcion}`;
+
+    // Opciones para compartir que incluyen el mensaje y la foto como archivo adjunto
+    const opciones = {
+      title: 'Compartir noticia',
+      text: mensaje,
+      files: [foto], // Se pasa la foto como archivo para compartir
+      dialogTitle: 'Compartir noticia'
     };
 
-    await this.storage.set('formData', JSON.stringify(formData));
-    console.log('Form data saved locally:', formData);
+    console.log(opciones);
 
-    // Marcar el formulario como enviado para mostrar los datos en la página
-    this.submitted = true;
+    // Comparte la noticia utilizando las opciones especificadas
+    await Share.share(opciones);
   }
 
-  // Método para verificar si el formulario es válido
-  isFormValid() {
-    return this.formData.country.trim() !== '' && this.formData.province.trim() !== '' && this.photoData !== null;
-  }
+  async eliminarNoticia(noticia: any) {
+    // Elimina la noticia de la lista de noticias
+    this.noticias = this.noticias.filter(item => item !== noticia);
 
-  // Método para manejar la selección de archivos
-  onFileSelected(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    if (inputElement.files && inputElement.files.length > 0) {
-      this.selectedFile = inputElement.files[0];
-      console.log('Selected file:', this.selectedFile);
-    }
+    // Elimina la noticia de Firebase Firestore
+    const noticiasRef = this.firestore.collection('Noticias', ref => ref.where('titulo', '==', noticia.titulo).limit(1));
+    noticiasRef.snapshotChanges().subscribe(actions => {
+      actions.forEach(action => {
+        const docId = action.payload.doc.id;
+        noticiasRef.doc(docId).delete();
+      });
+    });
   }
 }

@@ -79,7 +79,7 @@ export class ArticleComponent implements OnInit {
 
         // Agrega la opción de compartir solo si la plataforma es Capacitor
     if (this.platform.is('capacitor')) {
-      normalBtns.unshift(shareBtn);
+      normalBtns;
     }
 
         // Crea y presenta el Action Sheet

@@ -1,39 +1,35 @@
-<ion-header>
+<ion-header [translucent]="true" mode="ios" class="ion-no-border">
   <ion-toolbar>
     <ion-title>
-      Añadir Paisaje
+      Categorias
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <form (submit)="onSubmit()" novalidate>
-    <ion-list>
-      <ion-item>
-        <ion-label position="stacked">País</ion-label>
-        <ion-input type="text" name="country" [(ngModel)]="formData.country" required></ion-input>
-      </ion-item>
-      
-      <ion-item>
-        <ion-label position="stacked">Provincia</ion-label>
-        <ion-input type="text" name="province" [(ngModel)]="formData.province" required></ion-input>
-      </ion-item>
-      
-      <ion-item>
-        <ion-label position="stacked">Foto</ion-label>
-        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
-      </ion-item>
-    </ion-list>
-    
-    <ion-button type="submit" expand="block" [disabled]="!isFormValid()">Subir Foto</ion-button>
-  </form>
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense" mode="ios" class="ion-no-border">
+    <ion-toolbar>
+      <!-- <ion-title size="large">Encabezados</ion-title> -->
+    </ion-toolbar>
+  </ion-header>
 
-  <!-- Mostrar los datos guardados -->
-  <div *ngIf="submitted && formData">
-    <h2>Paisaje Añadido</h2>
-    <p><strong>País:</strong> {{ formData.country }}</p>
-    <p><strong>Provincia:</strong> {{ formData.province }}</p>
-    <p><strong>Foto:</strong></p>
-    <img *ngIf="photoData" [src]="photoData" alt="Foto del paisaje">
-  </div>
+  <!-- Botón para abrir el modal -->
+  <ion-button expand="block" (click)="openModal()">Agregar Noticia</ion-button>
+
+  <!-- Sección para mostrar las noticias -->
+  <ion-card *ngFor="let noticia of noticias">
+      <ion-img [src]="noticia.foto"></ion-img>
+      <ion-card-header>
+        <ion-card-title>{{ noticia.titulo }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        {{ noticia.descripcion }}
+      </ion-card-content>
+      <!-- Botón de compartir -->
+      <ion-button (click)="compartirNoticia(noticia)" expand="block" color="primary"><ion-icon name="share"></ion-icon></ion-button>
+      <ion-button (click)="eliminarNoticia(noticia)" expand="block" color="danger">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
+    </ion-card>
+    
 </ion-content>

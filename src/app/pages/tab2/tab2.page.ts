@@ -10,45 +10,60 @@ import { NewsService } from 'src/app/services/news.service';
 })
 export class Tab2Page implements OnInit {
 
-  @ViewChild(IonInfiniteScroll,{static:true}) infiniteScroll!:IonInfiniteScroll;
+  // Referencia al componente IonInfiniteScroll para controlar la carga infinita
+  @ViewChild(IonInfiniteScroll, { static: true }) infiniteScroll!: IonInfiniteScroll;
 
-  public categories:string[]=['business','entertainment','general','health','science','sports','technology'];
-  public selectedCategory:string=this.categories[0];
-  public articles:Article[]=[];
+  // Lista de categorías de noticias
+  public categories: string[] = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];
 
-  constructor(private newsService:NewsService) {}
+  // Categoría seleccionada
+  public selectedCategory: string = this.categories[0];
+
+  // Lista de artículos de noticias
+  public articles: Article[] = [];
+
+  constructor(private newsService: NewsService) {}
 
   ngOnInit() {
-    this.newsService.getTopHeadlinesByCategory(this.selectedCategory).subscribe(articles=>{
-        this.articles=[...articles]      
-    })
+    // Al inicializar el componente, cargar las principales noticias de la categoría seleccionada
+    this.loadArticlesByCategory(this.selectedCategory);
   }
 
-  segmentChanged(event:Event){
-    this.selectedCategory=(event as CustomEvent).detail.value;
-    this.newsService.getTopHeadlinesByCategory(this.selectedCategory).subscribe(articles=>{
-      this.articles=[...articles]      
-      
-    });
-    
+  // Método para cambiar de categoría
+  segmentChanged(event: Event) {
+    // Obtener la categoría seleccionada
+    this.selectedCategory = (event as CustomEvent).detail.value;
+
+    // Cargar las principales noticias de la categoría seleccionada
+    this.loadArticlesByCategory(this.selectedCategory);
   }
 
-  loadData(){
-    this.newsService.getTopHeadlinesByCategory(this.selectedCategory,true)
-    .subscribe(articles=>{
-
-      if (articles.length===this.articles.length) {
-        this.infiniteScroll.disabled=true;
-        // event.target.disabled=true;
-        return;
-      }
-      this.articles=articles;
+  // Método para cargar más datos al alcanzar el final de la lista
+  loadData() {
+    // Obtener más artículos de la categoría seleccionada
+    this.newsService.getTopHeadlinesByCategory(this.selectedCategory, true)
+      .subscribe(articles => {
+        // Verificar si ya se han cargado todos los artículos disponibles
+        if (articles.length === this.articles.length) {
+          // Deshabilitar el componente IonInfiniteScroll si no hay más artículos para cargar
+          this.infiniteScroll.disabled = true;
+          return;
+        }
+        // Actualizar la lista de artículos con los nuevos datos
+        this.articles = articles;
+        // Completar la carga infinita
         this.infiniteScroll.complete();
-      // event.target.complete();
-    })
-    
+      });
   }
 
-
+  // Método para cargar los artículos de noticias de una categoría específica
+  private loadArticlesByCategory(category: string) {
+    // Obtener las principales noticias de la categoría especificada
+    this.newsService.getTopHeadlinesByCategory(category)
+      .subscribe(articles => {
+        // Actualizar la lista de artículos con los nuevos datos
+        this.articles = articles;
+      });
+  }
 
 }

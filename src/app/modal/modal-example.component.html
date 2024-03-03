@@ -1,23 +1,23 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button color="medium" (click)="cancel()">Cancel</ion-button>
-    </ion-buttons>
-    <ion-title>Welcome</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="confirm()" [strong]="true">Confirm</ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-<ion-content class="ion-padding">
-  <ion-item>
-    <ion-input labelPlacement="stacked" label="Enter your name" [(ngModel)]="pais" placeholder="Pais"></ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-input labelPlacement="stacked" label="Enter your name" [(ngModel)]="provincia" placeholder="Provincia"></ion-input>
-  </ion-item>
-  <ion-item>
-    <label for="fileInput" class="ion-label">Select a photo:</label>
-    <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)">
-  </ion-item>
-</ion-content>
+  <ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button color="medium" (click)="cancel()">Cancel</ion-button>
+      </ion-buttons>
+      <ion-buttons slot="end">
+        <ion-button (click)="confirm()" [strong]="true">Confirm</ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content class="ion-padding">
+    <ion-item>
+      <ion-input labelPlacement="stacked" label="Titulo" [(ngModel)]="titulo" placeholder="Titulo"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input labelPlacement="stacked" label="descripcion" [(ngModel)]="descripcion" placeholder="Descripcion"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-button (click)="takePicture()"><ion-icon name="camera-outline"></ion-icon></ion-button>
+      <ion-button (click)="chooseFromGallery()"><ion-icon name="image-outline"></ion-icon></ion-button>
+    </ion-item>
+  
+  </ion-content>
